@@ -157,7 +157,7 @@ class Nerf_Movement(object):
         ## If you are using a different robot, change this value to the name of your robot
         ## arm planning group.
         ## This interface can be used to plan and execute motions:
-        group_name = "panda_arm"
+        group_name = "panda_manipulator"
         move_group = moveit_commander.MoveGroupCommander(group_name)
 
         ## Create a `DisplayTrajectory`_ ROS publisher which is used to display
@@ -206,7 +206,7 @@ class Nerf_Movement(object):
         self.eef_link = eef_link
         self.group_names = group_names
         self.upper_joint_limit, self.lower_joint_limit, self.vel_limit, self.torque_limit = self.read_robot_limits()
-        self.ik_solver = IK("panda_link0", "panda_link8")
+        self.ik_solver = IK("panda_link0", "panda_hand_tcp")
 
         self.T_matrix = np.array([[ 1.00972718, -0.03175631, -0.14718904,  0.62225599],
                              [ 0.27047383,  0.35774614,  1.17738679, -1.04287907],
@@ -1399,7 +1399,19 @@ if __name__ == "__main__":
     try:
         tutorial = Nerf_Movement()
         stating_joint_state = [0.017295376760307065, -1.4765418056583965, -0.049415543378438447, -3.0051199601376184, -0.013422825147092919, 1.5766404801091545, 0.8293549973573249]
-        
+        pose_goal = geometry_msgs.msg.Pose()
+        pose_goal.orientation.x = 1
+        pose_goal.orientation.y = 0
+        pose_goal.orientation.z = 0
+        pose_goal.orientation.w = 0
+        pose_goal.position.x = 0.564
+        pose_goal.position.y = 0.0000
+        pose_goal.position.z = 0.0
+        # pose_goal.position.x = 0.564
+        # pose_goal.position.y = 0.0000
+        # pose_goal.position.z = 0.083
+
+        #success = self.go_to_pose_goal(pose_goal)
         breakpoint()
         sys.exit()
         tutorial.add_mesh(0.475 + 0.2664, -0.086)#0.73)

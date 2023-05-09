@@ -1118,9 +1118,58 @@ def main():
         #     "============ Press `Enter` to begin the tutorial by setting up the moveit_commander ..."
         # )
 
+     
         tutorial = Nerf_Movement()
-        # tutorial.im_capture()
+        # stating_joint_state = [0.017295376760307065, -1.4765418056583965, -0.049415543378438447, -3.0051199601376184, -0.013422825147092919, 1.5766404801091545, 0.8293549973573249]
+        stating_joint_state = [0.03202341903301707, 0.45900370514601985, 0.0743635250858064, -0.8394780465249851, 0.01546591704007652, 0.7776030993991428, 0.8335337665490805]
+        #tutorial.go_to_joint_state(stating_joint_state)
+        # tutorial.move_group.get_current_pose().pose
+        pose_goal = geometry_msgs.msg.Pose()
         
+        
+        # pose_goal.orientation.x = 1
+        # pose_goal.orientation.y = 0
+        # pose_goal.orientation.z = 0
+        # pose_goal.orientation.w = 0
+        # pose_goal.position.x = 0.564
+        # pose_goal.position.y = 0.0000
+        # pose_goal.position.z = 0.083
+
+        # vgn first image
+        # pose_goal.orientation.x =  -0.901790861173276 
+        # pose_goal.orientation.y = 0.366695522605403
+        # pose_goal.orientation.z = -0.21038992033737
+        # pose_goal.orientation.w =  0.089686776204439
+        # pose_goal.position.x = 0.079483207891542  
+        # pose_goal.position.y = 0.047072439716997
+        # pose_goal.position.z = 0.679262824361048
+
+        # # vgn second image
+        # pose_goal.orientation.x =  0.925076600294354 
+        # pose_goal.orientation.y = -0.271806560838549
+        # pose_goal.orientation.z = 0.195766613012903
+        # pose_goal.orientation.w =  0.178969020510301
+        # pose_goal.position.x = 0.249550769859787    
+        # pose_goal.position.y = 0.33331052383524
+        # pose_goal.position.z = 0.709791225022178
+
+        # vgn third image
+        pose_goal.orientation.x =  0.9046239911923586 
+        pose_goal.orientation.y = -0.33937363082601135
+        pose_goal.orientation.z = -0.23962586521163892
+        pose_goal.orientation.w =  0.09518622789432876
+        pose_goal.position.x = 0.5823457477730496   
+        pose_goal.position.y =  0.05012877452921264   
+        pose_goal.position.z =  0.6263237215886096
+
+        # # vgn fourth image
+        # pose_goal.orientation.x =  -0.799461773742886        
+        # pose_goal.orientation.y =  0.553714216229519
+        # pose_goal.orientation.z = 0.080063492461308
+        # pose_goal.orientation.w = 0.218749345699836
+        # pose_goal.position.x = 0.273795783696059       
+        # pose_goal.position.y = -0.212487449909366  
+        # pose_goal.position.z = 0.710816798673578 
 
         # quaternion = tf.transformations.quaternion_from_euler(np.pi, 0, -np.pi/4) # (roll, pitch, yaw)   Practical to use euler
 
