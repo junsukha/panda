@@ -1169,9 +1169,9 @@ def get_quaternion(right_hem, i, tup):
 
 
     if right_hem:
-        temp_rotation = R.from_euler('xyz', [0, -32, (360/20 * i)], degrees=True)
+        temp_rotation = R.from_euler('xyz', [0, -35, (360/20 * i)], degrees=True)
     else:
-        temp_rotation = R.from_euler('xyz', [0, -32, -(360/20 * i)], degrees=True)
+        temp_rotation = R.from_euler('xyz', [0, -35, -(360/20 * i)], degrees=True)
     temp_rotation = temp_rotation.as_matrix()
     default = R.from_euler('xyz', [-180, 0, -45], degrees=True)
     default = default.as_matrix()
@@ -1192,12 +1192,12 @@ def circular_trajectory(tutorial, pose_goal):
     tutorial.go_to_pose_goal(pose_goal)
 
     # z = 0.53 
-    z = 0.52
+    z = 0.51
     # radius = 0.6213749044898143 - 0.305710315 
     radius = 0.22 # 0.2 
     angle_step = 2*np.pi / 20.0
     # center_x = 0.305710315 
-    center_x = 0.36
+    center_x = 0.37
     center_y = 0.0
     points = []
     right_hem = True
@@ -1262,14 +1262,14 @@ def capture_image(i, pipeline):
     if depth_colormap_dim != color_colormap_dim:
         resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
         print('taking image')
-        cv2.imwrite('./images/image{:03d}.png'.format(i), resized_color_image)
-        cv2.imwrite('./depths/depth{:03d}.pfm'.format(i), depth_colormap)
+        cv2.imwrite('./images/test{:03d}.png'.format(i), resized_color_image)
+        # cv2.imwrite('./depths/test{:03d}.pfm'.format(i), depth_colormap)
 
         images = np.hstack((resized_color_image, depth_colormap))
     else:
         print('taking image')
-        cv2.imwrite('./images/image{:03d}.png'.format(i), color_image)
-        cv2.imwrite('./depths/depth{:03d}.pfm'.format(i), depth_colormap)
+        cv2.imwrite('./images/test{:03d}.png'.format(i), color_image)
+        # cv2.imwrite('./depths/test{:03d}.pfm'.format(i), depth_colormap)
 
         images = np.hstack((color_image, depth_colormap)) # hstack to show rgb and depth side by side
 
