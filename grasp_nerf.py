@@ -1169,9 +1169,9 @@ def get_quaternion(right_hem, i, tup):
 
 
     if right_hem:
-        temp_rotation = R.from_euler('xyz', [0, -30, (360/20 * i)], degrees=True)
+        temp_rotation = R.from_euler('xyz', [0, -32, (360/20 * i)], degrees=True)
     else:
-        temp_rotation = R.from_euler('xyz', [0, -30, -(360/20 * i)], degrees=True)
+        temp_rotation = R.from_euler('xyz', [0, -32, -(360/20 * i)], degrees=True)
     temp_rotation = temp_rotation.as_matrix()
     default = R.from_euler('xyz', [-180, 0, -45], degrees=True)
     default = default.as_matrix()
@@ -1192,7 +1192,7 @@ def circular_trajectory(tutorial, pose_goal):
     tutorial.go_to_pose_goal(pose_goal)
 
     # z = 0.53 
-    z = 0.53
+    z = 0.52
     # radius = 0.6213749044898143 - 0.305710315 
     radius = 0.22 # 0.2 
     angle_step = 2*np.pi / 20.0
@@ -1361,8 +1361,8 @@ def main():
         else:
             config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         
-        pipeline.start(config)  
-        # while True:
+        pipeline.start(config)
+        capture_image(20, pipeline)
 
         for i, point in enumerate(points):
             print(f'Moving to position {i}')
