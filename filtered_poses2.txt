@@ -1,0 +1,53 @@
+Image 0:
+- Translation: [0.650, -0.063, 0.443]
+- Rotation: 
+            in RPY (radian) [2.764, -0.022, 1.54759]
+            in RPY (degree) [158.389, -1.242, 88.693]
+
+Image 1:
+- Translation: [0.631, 0.149, 0.453]
+- Rotation: 
+            in RPY (radian) [2.673, 0.001, 2.23359]
+            in RPY (degree) [153.148, 0.064, 127.997]
+
+Image 2:
+- Translation: [0.550, 0.302, 0.509]
+- Rotation: 
+            in RPY (radian) [2.633, 0.039, 2.70559]
+            in RPY (degree) [150.849, 2.208, 155.02]
+
+Image 3:
+- Translation: [0.234, 0.342, 0.533]
+- Rotation: 
+            in RPY (radian) [2.687, 0.276, 4.19859]
+            in RPY (degree) [153.951, 15.835, 240.556]
+            
+Image 4:
+- Translation: [0.158, 0.007, 0.557]
+- Rotation: 
+            in RPY (radian) [2.691, 0.115, 4.65059]
+            in RPY (degree) [154.197, 6.571, 266.478]
+            
+Image 5: - Translation: [0.076, -0.297, 0.595]
+- Rotation: 
+            in RPY (radian) [2.519, -0.094, 5.0765]
+            in RPY (degree) [144.328, -5.379, 290.892]
+
+Image 6:
+- Translation: [0.360, -0.363, 0.574]
+- Rotation: 
+            in RPY (radian) [2.633, 0.143, 6.16259]
+            in RPY (degree) [150.832, 8.203, 353.104]
+
+Image 7:
+- Translation: [0.554, -0.282, 0.465]
+- Rotation: 
+            in RPY (radian) [2.696, 0.001, 0.57059]
+            in RPY (degree) [154.468, 0.074, 32.697]
+
+            
+Image 8:
+- Translation: [0.501, -0.055, 0.606]
+- Rotation: 
+            in RPY (radian) [-3.088, 0.146, 4.76659]
+            in RPY (degree) [-176.954, 8.364, 273.083]

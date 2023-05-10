@@ -1404,12 +1404,14 @@ if __name__ == "__main__":
         pose_goal.orientation.y = 0
         pose_goal.orientation.z = 0
         pose_goal.orientation.w = 0
-        pose_goal.position.x = 0.564
-        pose_goal.position.y = 0.0000
-        pose_goal.position.z = 0.0
+
+        pose_goal.position.x = 0.5167311544024981
+        pose_goal.position.y = -0.0898657740611424
+        pose_goal.position.z = -0.2052250712667316
         # pose_goal.position.x = 0.564
         # pose_goal.position.y = 0.0000
         # pose_goal.position.z = 0.083
+
 
         #success = self.go_to_pose_goal(pose_goal)
         breakpoint()

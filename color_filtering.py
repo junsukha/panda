@@ -13,7 +13,7 @@ class KinectFilterNode:
         rospy.init_node('kinect_filter_node')
 
         # Subscribe to the Kinect point cloud topic
-        rospy.Subscriber('/camera/depth_registered/points', PointCloud2, self.kinect_callback)
+        rospy.Subscriber('/camera/depth/color/points', PointCloud2, self.kinect_callback)
 
         # Create a publisher to publish the filtered point cloud
         self.pub = rospy.Publisher('/camera/yellow_points', PointCloud2, queue_size=10)

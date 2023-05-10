@@ -213,7 +213,8 @@ class Nerf_Movement(object):
         self.eef_link = eef_link
         self.group_names = group_names
         self.upper_joint_limit, self.lower_joint_limit, self.vel_limit, self.torque_limit = self.read_robot_limits()
-        self.ik_solver = IK("panda_link0", "panda_link8")
+        # self.ik_solver = IK("panda_link0", "panda_link8")
+        self.ik_solver = IK("panda_link0", "panda_hand_tcp")
 
         # self.T_matrix = np.array([[ 1.00972718, -0.03175631, -0.14718904,  0.62225599],
         #                      [ 0.27047383,  0.35774614,  1.17738679, -1.04287907],
@@ -1095,6 +1096,84 @@ class Nerf_Movement(object):
 
 
         print("Finished calibration")
+from scipy.spatial.transform import Rotation as R
+def get_quaternion(tup):
+    aiming_position = np.array([0.305710315, 0.0, 0.2209254544486151])
+
+
+    current_camera_position = np.array([tup[0], tup[1], tup[2]])
+    # norm = np.linalg.norm(current_camera_position - aiming_position) 
+    # fromTtoC = (current_camera_position - aiming_position) / norm
+    norm = np.linalg.norm(aiming_position - current_camera_position) 
+    fromTtoC = (aiming_position - current_camera_position) / norm
+
+    # they call right axis = positive x. but in ours, it's negative x
+    # up_vector = [0.0, 1.0, 0.0]
+    up_vector = [0.0, 0.0, 1.0]
+
+
+    # get camera right vector
+    cross = np.cross(fromTtoC, up_vector)
+    norm = np.linalg.norm(cross)
+    cameraleft = cross / norm # check if float
+
+    # get camera up vector
+    cameraUp = np.cross(fromTtoC, cameraleft)
+    
+    # first col: x axis, second col: y axis, thrid col: z axis
+    # in tutorial, x is right vector. so use rightvector (in my variable cameraleft)
+    rotation = np.array([[cameraleft[0], cameraUp[0], fromTtoC[0], 0],
+                         [cameraleft[1], cameraUp[1], fromTtoC[1], 0],
+                         [cameraleft[2], cameraUp[2], fromTtoC[2], 0],
+                         [0, 0, 0, 1]])
+
+    rotation = np.array([[fromTtoC[0], cameraleft[0], cameraUp[0], 0],
+                         [fromTtoC[1], cameraleft[1], cameraUp[1], 0],
+                         [fromTtoC[2], cameraleft[2], cameraUp[2], 0],
+                         [0, 0, 0, 1]])
+    rotation = np.array([[fromTtoC[0], cameraleft[0], cameraUp[0]],
+                         [fromTtoC[1], cameraleft[1], cameraUp[1]],
+                         [fromTtoC[2], cameraleft[2], cameraUp[2]]
+                         ])
+
+    # rotation = np.array([[cameraleft[0], cameraleft[0], cameraUp[0], 0],
+    #                      [cameraleft[1], cameraleft[1], cameraUp[1], 0],
+    #                      [cameraleft[2], cameraleft[2], cameraUp[2], 0],
+    #                      [0, 0, 0, 1]])
+
+
+    # default = R.from_rotvec(np.array([-np.pi, 0, -np.pi/2]))
+    default = R.from_euler('xyz', [-180, 0, -45], degrees=True)
+    default = default.as_matrix()
+    
+    # default = np.hstack((default, np.array([0,0,0]).reshape(3,1)))
+    # default = np.vstack((default, np.array([0,0,0,1]).reshape(1,4)))
+    # print(default)
+    # quaternion = tf.transformations.quaternion_from_matrix( default@rotation ) 
+    full_rot = default @ rotation
+    r = R.from_matrix(full_rot)
+    quaternion = r.as_quat()
+    return quaternion
+
+def circular_trajectory():
+    z = 0.54    
+    radius = 0.6213749044898143 - 0.305710315    
+    angle_step = 2*np.pi / 20.0
+    center_x = 0.305710315    
+    center_y = 0.0
+    points = []
+    for i in range(20):
+        angle = angle_step * i
+        # x = center_x + radius * math.cos(angle)
+        x = -0.009954273713935854 + radius * math.cos(angle)#min x
+        y = center_y + radius * math.sin(angle)
+
+        quat = get_quaternion((x,y,z))
+        points.append((
+                x, y, z, quat[0], quat[1], quat[2], quat[3]
+            ))
+    points.reverse()
+    return points
 
 
 
@@ -1125,7 +1204,36 @@ def main():
         #tutorial.go_to_joint_state(stating_joint_state)
         # tutorial.move_group.get_current_pose().pose
         pose_goal = geometry_msgs.msg.Pose()
+        points = circular_trajectory()
+        for i, point in enumerate(points):
+            print(f'Moving to position {i}')
+            pose_goal.position.x = point[0]
+            pose_goal.position.y = point[1]
+            pose_goal.position.z = point[2]
+            pose_goal.orientation.x = point[3]
+            pose_goal.orientation.y = point[4]
+            pose_goal.orientation.z = point[5]
+            pose_goal.orientation.w = point[6]
+            # print(pose_goal)
+            reached = False
+            while not reached:
+                reached = tutorial.go_to_pose_goal(pose_goal)
+            # breakpoint()
+        exit(0)
+
+          
+        pose_goal.orientation.x =  -1.000000e+00
+        pose_goal.orientation.y =  0
+        pose_goal.orientation.z =  0
+        pose_goal.orientation.w = 6.123234e-17 
+        pose_goal.position.x = 0.3078280377829998
+        pose_goal.position.y = 0.0010744939372069422
+        pose_goal.position.z = 0.5902787311655988
+
+        breakpoint()
         
+
+
         
         # pose_goal.orientation.x = 1
         # pose_goal.orientation.y = 0
@@ -1134,6 +1242,14 @@ def main():
         # pose_goal.position.x = 0.564
         # pose_goal.position.y = 0.0000
         # pose_goal.position.z = 0.083
+
+        # pose_goal.orientation.x = 1
+        # pose_goal.orientation.y = 0
+        # pose_goal.orientation.z = 0
+        # pose_goal.orientation.w = 0
+        # pose_goal.position.x = 0.6
+        # pose_goal.position.y = 0.0000
+        # pose_goal.position.z = 0.0
 
         # vgn first image
         # pose_goal.orientation.x =  -0.901790861173276 
@@ -1154,13 +1270,13 @@ def main():
         # pose_goal.position.z = 0.709791225022178
 
         # vgn third image
-        pose_goal.orientation.x =  0.9046239911923586 
-        pose_goal.orientation.y = -0.33937363082601135
-        pose_goal.orientation.z = -0.23962586521163892
-        pose_goal.orientation.w =  0.09518622789432876
-        pose_goal.position.x = 0.5823457477730496   
-        pose_goal.position.y =  0.05012877452921264   
-        pose_goal.position.z =  0.6263237215886096
+        # pose_goal.orientation.x =  0.9046239911923586 
+        # pose_goal.orientation.y = -0.33937363082601135
+        # pose_goal.orientation.z = -0.23962586521163892
+        # pose_goal.orientation.w =  0.09518622789432876
+        # pose_goal.position.x = 0.5823457477730496   
+        # pose_goal.position.y =  0.05012877452921264   
+        # pose_goal.position.z =  0.6263237215886096
 
         # # vgn fourth image
         # pose_goal.orientation.x =  -0.799461773742886        
@@ -1183,6 +1299,9 @@ def main():
         # pose_goal.position.z = 0.0
 
         # tutorial.go_to_pose_goal(pose_goal)
+
+
+
 
 
         breakpoint()
