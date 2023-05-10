@@ -1097,86 +1097,192 @@ class Nerf_Movement(object):
 
         print("Finished calibration")
 from scipy.spatial.transform import Rotation as R
-def get_quaternion(tup):
-    aiming_position = np.array([0.305710315, 0.0, 0.2209254544486151])
-
+def get_quaternion(right_hem, i, tup):
+    # aiming_position = np.array([0.305710315, 0.0, 0.2209254544486151])
+    aiming_position = np.array([0.38, 0.0, 0.12])
+    # aiming_position = np.array([tup[0], tup[1], 0.2209254544486151])
 
     current_camera_position = np.array([tup[0], tup[1], tup[2]])
+    # current_camera_position = np.array([-0.009954273713935854, -0.08314338150720664, 0.6303075946704119])
+
     # norm = np.linalg.norm(current_camera_position - aiming_position) 
     # fromTtoC = (current_camera_position - aiming_position) / norm
     norm = np.linalg.norm(aiming_position - current_camera_position) 
-    fromTtoC = (aiming_position - current_camera_position) / norm
+    fromTtoC = (aiming_position- current_camera_position) / norm
+
 
     # they call right axis = positive x. but in ours, it's negative x
     # up_vector = [0.0, 1.0, 0.0]
-    up_vector = [0.0, 0.0, 1.0]
+    # up_vector = [1.0, 0.0, 0.0]
+    up_vector = [aiming_position[0] - current_camera_position[0], 
+                aiming_position[1] - current_camera_position[1], 
+                0.0]
+    norm_up_vector = np.linalg.norm(up_vector)
+    up_vector = up_vector / norm_up_vector
+
 
 
     # get camera right vector
-    cross = np.cross(fromTtoC, up_vector)
-    norm = np.linalg.norm(cross)
-    cameraleft = cross / norm # check if float
+    # cross_right = np.cross(up_vector, fromTtoC)
+    # norm = np.linalg.norm(cross_right)
+    # cameraRight = cross_right / norm # check if float
+
+    cross_right = np.cross(fromTtoC, up_vector)
+    norm = np.linalg.norm(cross_right)
+    cameraRight = cross_right / norm # check if float
+    
+
+    # cross_left = np.cross(fromTtoC, up_vector)    
+    # norm = np.linalg.norm(cross_left)    
+    # cameraLeft = cross_left / norm # check if float
+
 
     # get camera up vector
-    cameraUp = np.cross(fromTtoC, cameraleft)
+    # cameraUp = np.cross(fromTtoC, cameraRight)
+    cameraUp = np.cross(cameraRight, fromTtoC)
+    # cameraUp = np.cross(cameraLeft, fromTtoC)
     
-    # first col: x axis, second col: y axis, thrid col: z axis
-    # in tutorial, x is right vector. so use rightvector (in my variable cameraleft)
-    rotation = np.array([[cameraleft[0], cameraUp[0], fromTtoC[0], 0],
-                         [cameraleft[1], cameraUp[1], fromTtoC[1], 0],
-                         [cameraleft[2], cameraUp[2], fromTtoC[2], 0],
-                         [0, 0, 0, 1]])
-
-    rotation = np.array([[fromTtoC[0], cameraleft[0], cameraUp[0], 0],
-                         [fromTtoC[1], cameraleft[1], cameraUp[1], 0],
-                         [fromTtoC[2], cameraleft[2], cameraUp[2], 0],
-                         [0, 0, 0, 1]])
-    rotation = np.array([[fromTtoC[0], cameraleft[0], cameraUp[0]],
-                         [fromTtoC[1], cameraleft[1], cameraUp[1]],
-                         [fromTtoC[2], cameraleft[2], cameraUp[2]]
-                         ])
-
-    # rotation = np.array([[cameraleft[0], cameraleft[0], cameraUp[0], 0],
-    #                      [cameraleft[1], cameraleft[1], cameraUp[1], 0],
-    #                      [cameraleft[2], cameraleft[2], cameraUp[2], 0],
+    # rotation = np.array([[cameraRight[0], cameraUp[0], fromTtoC[0], 0],
+    #                      [cameraRight[1], cameraUp[1], fromTtoC[1], 0],
+    #                      [cameraRight[2], cameraUp[2], fromTtoC[2], 0],
     #                      [0, 0, 0, 1]])
 
+    # rotation = np.array([[fromTtoC[0], cameraLeft[0], cameraUp[0], 0],
+    #                      [fromTtoC[1], cameraLeft[1], cameraUp[1], 0],
+    #                      [fromTtoC[2], cameraLeft[2], cameraUp[2], 0],
+    #                      [0.0, 0, 0, 1]])
 
-    # default = R.from_rotvec(np.array([-np.pi, 0, -np.pi/2]))
+    # rotation = np.array([[cameraUp[0], cameraLeft[0], fromTtoC[0], 0],
+    #                      [cameraUp[1], cameraLeft[1], fromTtoC[1], 0],
+    #                      [cameraUp[2], cameraLeft[2], fromTtoC[2], 0],
+    #                      [0.0, 0, 0, 1]])
+
+    temp_rotation = np.array([[cameraUp[0], cameraRight[0], fromTtoC[0]],
+                         [cameraUp[1], cameraRight[1], fromTtoC[1]],
+                         [cameraUp[2], cameraRight[2], fromTtoC[2]]
+                         ])
+
+    # rotation = np.array([[fromTtoC[0], cameraLeft[0], cameraUp[0]],
+    #                      [fromTtoC[1], cameraLeft[1], cameraUp[1]],
+    #                      [fromTtoC[2], cameraLeft[2], cameraUp[2]]
+    #                      ])
+
+
+    if right_hem:
+        temp_rotation = R.from_euler('xyz', [0, -30, (360/20 * i)], degrees=True)
+    else:
+        temp_rotation = R.from_euler('xyz', [0, -30, -(360/20 * i)], degrees=True)
+    temp_rotation = temp_rotation.as_matrix()
     default = R.from_euler('xyz', [-180, 0, -45], degrees=True)
     default = default.as_matrix()
     
     # default = np.hstack((default, np.array([0,0,0]).reshape(3,1)))
     # default = np.vstack((default, np.array([0,0,0,1]).reshape(1,4)))
     # print(default)
+    # r = R.from_matrix(temp_rotation)
+    # print(r.as_euler('xyz', degrees=True))
     # quaternion = tf.transformations.quaternion_from_matrix( default@rotation ) 
-    full_rot = default @ rotation
+    full_rot = temp_rotation @ default
     r = R.from_matrix(full_rot)
     quaternion = r.as_quat()
+
     return quaternion
 
-def circular_trajectory():
-    z = 0.54    
-    radius = 0.6213749044898143 - 0.305710315    
+def circular_trajectory(tutorial, pose_goal):
+    tutorial.go_to_pose_goal(pose_goal)
+
+    # z = 0.53 
+    z = 0.53
+    # radius = 0.6213749044898143 - 0.305710315 
+    radius = 0.22 # 0.2 
     angle_step = 2*np.pi / 20.0
-    center_x = 0.305710315    
+    # center_x = 0.305710315 
+    center_x = 0.36
     center_y = 0.0
     points = []
-    for i in range(20):
+    right_hem = True
+    for i in range(11):
         angle = angle_step * i
-        # x = center_x + radius * math.cos(angle)
-        x = -0.009954273713935854 + radius * math.cos(angle)#min x
-        y = center_y + radius * math.sin(angle)
+        x = center_x + radius * (-math.cos(angle))
+        y = center_y + radius * (-math.sin(angle))
 
-        quat = get_quaternion((x,y,z))
+        quat = get_quaternion(right_hem, i, (x,y,z))
         points.append((
                 x, y, z, quat[0], quat[1], quat[2], quat[3]
             ))
-    points.reverse()
+
+   
+    # tutorial.go_to_pose_goal(pose_goal)
+
+    for i in range(1,10):
+        angle = angle_step * i
+        x = center_x + radius * (-math.cos(angle))
+        y = center_y + radius * (math.sin(angle))
+
+        quat = get_quaternion(not right_hem, i, (x,y,z))
+        points.append((
+                x, y, z, quat[0], quat[1], quat[2], quat[3]
+            ))
+    # points.reverse()
+    # x = center_x + radius * (-math.cos(45))
+    # y = center_y + radius * (-math.sin(45))
+    # quat = get_quaternion((x,y,z))
+    # points.append((
+    #             x, y, z, quat[0], quat[1], quat[2], quat[3]
+    #         ))
+    # tutorial.go_to_pose_goal(pose_goal)
+
+ 
     return points
 
 
+def capture_image(i, pipeline):
+        
 
+
+            
+# Wait for a coherent pair of frames: depth and color
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+    # if not depth_frame or not color_frame:
+    #     continue
+
+    # Convert images to numpy arrays
+    depth_image = np.asanyarray(depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+
+    # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+
+    depth_colormap_dim = depth_colormap.shape
+    color_colormap_dim = color_image.shape
+
+    # If depth and color resolutions are different, resize color image to match depth image for display
+    if depth_colormap_dim != color_colormap_dim:
+        resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
+        print('taking image')
+        cv2.imwrite('./images/image{:03d}.png'.format(i), resized_color_image)
+        cv2.imwrite('./depths/depth{:03d}.pfm'.format(i), depth_colormap)
+
+        images = np.hstack((resized_color_image, depth_colormap))
+    else:
+        print('taking image')
+        cv2.imwrite('./images/image{:03d}.png'.format(i), color_image)
+        cv2.imwrite('./depths/depth{:03d}.pfm'.format(i), depth_colormap)
+
+        images = np.hstack((color_image, depth_colormap)) # hstack to show rgb and depth side by side
+
+        # i+=1
+        # Show images
+        # cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+        # cv2.imshow('RealSense', images)
+        # cv2.waitKey(1)
+    # i+=1
+
+# finally:
+
+     
 
 def main():
     try:
@@ -1199,12 +1305,65 @@ def main():
 
      
         tutorial = Nerf_Movement()
+        # print(tutorial.move_group.get_current_pose().pose)
+        # exit(0)
         # stating_joint_state = [0.017295376760307065, -1.4765418056583965, -0.049415543378438447, -3.0051199601376184, -0.013422825147092919, 1.5766404801091545, 0.8293549973573249]
         stating_joint_state = [0.03202341903301707, 0.45900370514601985, 0.0743635250858064, -0.8394780465249851, 0.01546591704007652, 0.7776030993991428, 0.8335337665490805]
         #tutorial.go_to_joint_state(stating_joint_state)
         # tutorial.move_group.get_current_pose().pose
         pose_goal = geometry_msgs.msg.Pose()
-        points = circular_trajectory()
+
+        stating_joint_state = [0, -0.785398163397, 0, -2.35619449019, 0, 1.57079632679, 0.785398163397]
+        reached = False
+        print('Moving to start')
+        while not reached:
+            reached = tutorial.go_to_joint_state(stating_joint_state)
+        # starting position
+        pose_goal.orientation.x = -0.9235819691804623
+        pose_goal.orientation.y = 0.38339598084673
+        pose_goal.orientation.z = -0.0012122719194721824
+        pose_goal.orientation.w = 0.0015487001345217454
+        pose_goal.position.x = 0.3078280377829998
+        pose_goal.position.y = 0.0010744939372069422
+        pose_goal.position.z = 0.5898451756657014
+
+        points = circular_trajectory(tutorial, pose_goal)
+
+        # move to start position before starting circulating
+        print('Starting path')
+        reached = False
+        while not reached:
+            reached = tutorial.go_to_pose_goal(pose_goal)
+
+        print('Configureing camera...')
+        pipeline = rs.pipeline()
+        config = rs.config()
+
+        # Get device product line for setting a supporting resolution
+        pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+        pipeline_profile = config.resolve(pipeline_wrapper)
+        device = pipeline_profile.get_device()
+        device_product_line = str(device.get_info(rs.camera_info.product_line))
+
+        found_rgb = False
+        for s in device.sensors:
+            if s.get_info(rs.camera_info.name) == 'RGB Camera':
+                found_rgb = True
+                break
+        if not found_rgb:
+            print("The demo requires Depth camera with Color sensor")
+            exit(0)
+
+        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+        if device_product_line == 'L500':
+            config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+        else:
+            config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        
+        pipeline.start(config)  
+        # while True:
+
         for i, point in enumerate(points):
             print(f'Moving to position {i}')
             pose_goal.position.x = point[0]
@@ -1218,22 +1377,48 @@ def main():
             reached = False
             while not reached:
                 reached = tutorial.go_to_pose_goal(pose_goal)
-            # breakpoint()
+            
+            
+            capture_image(i, pipeline)
+                
+            if i == 10:
+                stating_joint_state = [0, -0.785398163397, 0, -2.35619449019, 0, 1.57079632679, 0.785398163397]
+                reached = False
+                print('Moving to start')
+                while not reached:
+                    reached = tutorial.go_to_joint_state(stating_joint_state)
+
+        stating_joint_state = [0, -0.785398163397, 0, -2.35619449019, 0, 1.57079632679, 0.785398163397]
+        reached = False
+        
+        # Stop streaming
+        pipeline.stop()   
+        print('Moving to start')
+        
+        while not reached:
+            reached = tutorial.go_to_joint_state(stating_joint_state)
         exit(0)
 
           
-        pose_goal.orientation.x =  -1.000000e+00
-        pose_goal.orientation.y =  0
-        pose_goal.orientation.z =  0
-        pose_goal.orientation.w = 6.123234e-17 
-        pose_goal.position.x = 0.3078280377829998
-        pose_goal.position.y = 0.0010744939372069422
-        pose_goal.position.z = 0.5902787311655988
+        # pose_goal.orientation.x =  -1.000000e+00
+        # pose_goal.orientation.y =  0
+        # pose_goal.orientation.z =  0
+        # pose_goal.orientation.w = 6.123234e-17 
+        # pose_goal.position.x = 0.3078280377829998
+        # pose_goal.position.y = 0.0010744939372069422
+        # pose_goal.position.z = 0.5902787311655988
 
-        breakpoint()
+        # breakpoint()
         
 
-
+        # starting position
+        # pose_goal.orientation.x = -0.9235819691804623
+        # pose_goal.orientation.y = 0.38339598084673
+        # pose_goal.orientation.z = -0.0012122719194721824
+        # pose_goal.orientation.w = 0.0015487001345217454
+        # pose_goal.position.x = 0.3078280377829998
+        # pose_goal.position.y = 0.0010744939372069422
+        # pose_goal.position.z = 0.5902787311655988
         
         # pose_goal.orientation.x = 1
         # pose_goal.orientation.y = 0
