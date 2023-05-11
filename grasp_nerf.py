@@ -1262,13 +1262,15 @@ def capture_image(i, pipeline):
     if depth_colormap_dim != color_colormap_dim:
         resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
         print('taking image')
-        cv2.imwrite('./images/test{:03d}.png'.format(i), resized_color_image)
+        cv2.imwrite('./test/test{:03d}.png'.format(i), resized_color_image)
+        # upload_image_to_s3('./test/test{:03d}.png'.format(i), 'pandanerf')
         # cv2.imwrite('./depths/test{:03d}.pfm'.format(i), depth_colormap)
 
         images = np.hstack((resized_color_image, depth_colormap))
     else:
         print('taking image')
-        cv2.imwrite('./images/test{:03d}.png'.format(i), color_image)
+        cv2.imwrite('./test/test{:03d}.png'.format(i), color_image)
+        # upload_image_to_s3('./test/test{:03d}.png'.format(i), 'pandanerf')
         # cv2.imwrite('./depths/test{:03d}.pfm'.format(i), depth_colormap)
 
         images = np.hstack((color_image, depth_colormap)) # hstack to show rgb and depth side by side
@@ -1281,8 +1283,23 @@ def capture_image(i, pipeline):
     # i+=1
 
 # finally:
-
-     
+import subprocess
+def upload_image_to_s3(image_path, bucket_name):
+        try:
+            # Build the AWS CLI command
+            aws_command = f"aws s3 cp {image_path} s3://{bucket_name}/"
+            
+            # Run the command using subprocess
+            process = subprocess.run(aws_command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            # Print the output on successful execution
+            if process.returncode == 0:
+                print(f"Successfully uploaded {image_path} to {bucket_name}")
+            else:
+                print(f"Error uploading {image_path} to {bucket_name}: {process.stderr.decode('utf-8')}")
+                
+        except subprocess.CalledProcessError as e:
+            print(f"Error uploading {image_path} to {bucket_name}: {e.output.decode('utf-8')}")
 
 def main():
     try:
@@ -1363,7 +1380,6 @@ def main():
         
         pipeline.start(config)
         capture_image(20, pipeline)
-
         for i, point in enumerate(points):
             print(f'Moving to position {i}')
             pose_goal.position.x = point[0]
@@ -1377,8 +1393,6 @@ def main():
             reached = False
             while not reached:
                 reached = tutorial.go_to_pose_goal(pose_goal)
-            
-            
             capture_image(i, pipeline)
                 
             if i == 10:
@@ -1391,12 +1405,22 @@ def main():
         stating_joint_state = [0, -0.785398163397, 0, -2.35619449019, 0, 1.57079632679, 0.785398163397]
         reached = False
         
+
         # Stop streaming
         pipeline.stop()   
+        
+
+        # send images AWS
+        for i in range(21):
+            upload_image_to_s3('./test/test{:03d}.png'.format(i), 'pandanerf')
+
         print('Moving to start')
         
         while not reached:
             reached = tutorial.go_to_joint_state(stating_joint_state)
+
+        # image_path = '/Home/panda_ws/src/panda_motion_planning/scripts/test/test001.png'
+       
         exit(0)
 
           
